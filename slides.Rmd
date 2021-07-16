@@ -1,0 +1,216 @@
+---
+title: "How to choose a license for an academic project"
+subtitle: ""
+author: "Hugo Gruson"
+institute: ""
+date: ""
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  out.width = "80%",
+  fig.width=5,
+  fig.height=3.5,
+  dev='svglite'
+)
+```
+
+```{css}
+li, p {
+  font-size: 1.5rem;
+  line-height: 150%;
+}
+.footnote {
+  font-size: 1rem;
+}
+```
+
+```{r}
+library(fontawesome)
+```
+
+## Free/Libre Open Source Software ("FLOSS")
+
+Four freedoms: 
+- The freedom to run the program as you wish, for any purpose.
+- The freedom to study how the program works, and change it so it does your computing as you wish.
+- The freedom to redistribute copies so you can help others.
+- The freedom to distribute copies of your modified versions to others. By doing this you can give the whole community a chance to benefit from your changes.
+
+.footnote[Source: <https://www.gnu.org/philosophy/free-sw.en.html>]
+
+---
+
+## Copyleft licenses
+
+You have to keep the same license (or a compatible FLOSS license) for downstream
+projects.
+
+- GNU Public License (version 2 & 3) and derivatives:
+  * AGPL (for applications on servers mainly)
+  * LGPL (for libraries mainly)
+--
+
+- Creative Commons ShareAlike ("CC-SA")
+
+---
+
+## Copyleft licenses
+
+### GNU Public License notable examples
+
+```{r}
+fa("fab fa-linux", height = "5em", margin_right = "2em")
+fa("fab fa-git", height = "5em", margin_right = "2em")
+fa("fab fa-r-project", height = "5em")
+```
+
+
+--
+
+### Creative Commons ShareAlike notable examples
+
+```{r, class.source = "logos"}
+fa("fab fa-wikipedia-w", height = "5em", margin_right = "2em")
+fa("fab fa-stack-overflow", height = "5em")
+```
+
+---
+
+## Non-copyleft licenses
+
+- MIT
+- Apache
+- BSD
+- CC0 / zero-clause BSD / public domain
+
+---
+
+## Non-copyleft licenses
+
+### MIT notable examples
+
+```{r, class.source = "logos"}
+fa("fab fa-react", height = "3em", margin_right = "2em")
+fa("fab fa-angular", height = "3em", margin_right = "2em")
+fa("fab fa-rust", height = "3em", margin_right = "2em")
+```
+
+### BSD(-like) notable examples
+
+```{r, class.source = "logos"}
+fa("fab fa-python", height = "3em", margin_right = "2em")
+```
+
+numpy, pandas, scipy, pytorch
+
+### Apache notable examples
+
+```{r, class.source = "logos"}
+fa("fab fa-android", height = "3em")
+```
+
+---
+
+## Other notable cases
+
+Intermediary copyleft:
+
+- MPL: only redistribute parts under copyleft, not the whole codebase.
+
+--
+
+Non-free licenses:
+
+- Creative Commons NoDerivative / NoCommercial (CC-ND / CC-NC)
+--
+
+- JSON license
+
+> The Software shall be used for Good, not Evil.
+
+---
+
+## A resource to help you choose
+
+```{r}
+knitr::include_app("https://choosealicense.com")
+```
+
+.footnote[<https://choosealicense.com/>]
+
+---
+
+## Licenses in the R package ecosystem
+
+As of `r Sys.Date()`:
+
+```{r, cache = TRUE, cache.extra = Sys.Date()}
+cran_today <- available.packages(contriburl = contrib.url("https://cloud.r-project.org"))
+```
+
+```{r, dev='svglite', plot = TRUE}
+library(dplyr)
+library(ggplot2)
+cran_today %>%
+  as.data.frame() %>%
+  mutate(simple_license = case_when(
+    grepl("^AGPL", License) ~ "AGPL",
+    grepl("^GNU Affero", License) ~ "AGPL",
+    grepl("^GPL", License) ~ "GPL",
+    grepl("^GNU General Public License", License) ~ "GPL",
+    grepl("^LGPL", License) ~ "LGPL",
+    grepl("^Lesser G[nN][uU]", License) ~ "LGPL",
+    grepl("GNU Lesser", License) ~ "LGPL",
+    grepl("^MIT", License) ~ "MIT",
+    grepl("^MPL", License) ~ "MPL",
+    grepl("^Mozilla", License) ~ "MPL",
+    grepl("^Apache License", License) ~ "Apache",
+    grepl("^BSD(_| )2", License) ~ "BSD 2-clause",
+    grepl("^BSD(_| )3", License) ~ "BSD 3-clause",
+    grepl("^Artistic", License) ~ "Artistic",
+    grepl("^CC0", License) ~ "Public domain",
+    grepl("Unlimited", License) ~ "Public domain",
+    grepl("^CC", License) ~ "Creative Commons",
+    grepl("^Creative Commons", License) ~ "Creative Commons",
+    TRUE ~ "Other"
+  )) %>%
+  count(simple_license) %>%
+  ggplot(aes(y = reorder(simple_license, n), x = n)) +
+    geom_histogram(stat = "identity") +
+    labs(y = "Licence family", x = "Number of packages on CRAN") +
+    theme_minimal()
+```
+---
+
+## License of most downloaded CRAN packages
+
+During the last month:
+
+```{r}
+rlib_pkgs <- c("vctrs", "rlang", "lifecycle", "ellipsis", "pillar", 
+               "textshaping", "cli", "ragg", "glue", "cpp11", "pkgdown", 
+               "crayon")
+tidyverse_pkgs <- c("ggplot2", "dplyr", "tibble", "magrittr")
+jeroen_pkgs <- c("jsonlite")
+sf_pkgs <- c("sf")
+yihui_pkgs <- c("xfun")
+
+cranlogs::cran_top_downloads(when = "last-month", 20) %>%
+  ggplot(aes(x = count, y = reorder(package, -rank))) +
+  geom_histogram(stat = "identity") +
+  theme_minimal() +
+  labs(y = "Package", x = "Number of downloads")
+```
